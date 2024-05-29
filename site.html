@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body class="hide-materials">
+
+    <style>
+
+		* {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+		}
+
+        body {
+			direction: rtl;
+			background: #fff;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-weight: 500;
+            color: #111;
+			width: 100%;
+        }
+
+        li {
+            display: flex;
+            gap: 10px;
+            background: #eee;
+            padding: 10px;
+			width: 100%;
+			flex-direction: column;
+
+			flex-shrink: 0;
+			flex-wrap: wrap;
+        }
+
+		li:nth-child(2n) {
+			background: #ddd;
+		}
+
+		span:not(.no-style), .main {
+			display: flex;
+			flex-direction: column;
+			gap: 5px;
+			align-items: center;
+			flex-shrink: 0;
+			margin-inline: 5px;
+			white-space: nowrap;
+			background: #555;
+			padding: 5px;
+			border-radius: 3px;
+			color: white;
+			flex-wrap: wrap;
+
+		}
+
+
+        div#controls { 
+          display: flex;
+          justify-content: space-between;
+        }
+
+		.grid { 
+			display: grid;
+			grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+			gap: 10px;
+			flex: 1;
+		}
+
+		.main {
+			display: flex;
+			flex-direction: row;
+            justify-content: space-between;
+			gap: 10px;
+
+			span { 
+				display: flex;
+				white-space: nowrap;
+				gap: 5px;
+			}
+		}
+
+        select {
+          padding: 4px;
+          font-size: 1.1em;
+        }
+
+		.hide-materials .grid span:not(.main) {display: none;}
+    </style>
+
+    <div id="controls">
+      <input type="text" class="name">
+	  <span class="no-style">
+		<span class="no-style">
+			<label for="materials">اظهار المواد</label>
+			<input type="checkbox" id="matirals">
+		</span>
+			<select>
+				<option value="اسم الطالب">اسم الطالب</option>
+				<option value="مجموع الكلى" selected="selected">مجموع الكلى</option>
+				<option value="رقم الجلوس">رقم الجلوس</option>
+				<option value="اللغة العربية">اللغة العربية</option>
+				<option value="اللغة الانجليزية">اللغة الانجليزية</option>
+				<option value="اللغة الفرنسية">اللغة الفرنسية</option>
+				<option value="رياضيات">رياضيات</option>
+				<option value="أحياء">أحياء</option>
+				<option value="كيمياء">كيمياء</option>
+				<option value="فيزياء">فيزياء</option>
+				<option value="جغرافيا">جغرافيا</option>
+				<option value="فلسفة">فلسفة</option>
+				<option value="تربية دينية">تربية دينية</option>
+				<option value="تربية وطنية">تربية وطنية</option>
+				<option value="تكنولوجيا اعمال">تكنولوجيا اعمال</option>
+				<option value="مشروعات بحثية">مشروعات بحثية</option>
+				<option value="نشاط تربوى">نشاط تربوى</option>
+				<option value="تربية رياضية">تربية رياضية</option>
+				<option value="ناجح">ناجح</option>
+				<option value="ساقط">ساقط</option>
+				<option value="مواد الدور الثانى">مواد الدور الثانى</option>
+			</select>
+	  </span>
+    </div>
+
+    <ul></ul>
+
+    <script>
+        console.clear()
+        let data
+        let ul = document.querySelector('ul')
+        
+        let numbers = [
+			"رقم الجلــــــــوس",
+			'مجموع الكلى',
+			"لغة عربية",
+			"انجليزى",
+			"فرنساوى",
+			"رياضيات",
+			"أحياء",
+			"كيمياء",
+			"فيزياء",
+			"جغرافيا",
+			"فلسفة",
+			"تربية دينية",
+			"تربية وطنية",
+			"تكنولوجيا اعمال",
+			"مشروعات بحثية",
+			"نشاط تربوى",
+			"تربية رياضية"
+        ]
+
+		let filters = {
+			"اسم الطالب": (a,b) => [a["اســـــم الطــــالــــــــب"],b["اســـــم الطــــالــــــــب"]].sort()[0] == b["اســـــم الطــــالــــــــب"],
+			"ناجح": (a,b) => a["الحالة"] == "ناجح",
+			"ساقط": (a,b) => a["الحالة"] == "ساقط",
+			"مواد الدور الثانى": (a,b) => a["مواد الدور الثانى"] != "",
+		}
+
+		numbers.forEach(value => {
+			filters[value] = (a,b) => {
+                return b[value] - a[value]
+            }
+		})
+
+		let select = document.querySelector('select')
+		let inp = document.querySelector('input[type="text"]')
+		let checkbox = document.querySelector('input[type="checkbox"]')
+
+        async function main() {
+            if(!data) data = Object.values(await fetch('data.json').then(x => x.json()))
+
+            filteredData = data.sort(filters[select.value])
+			.filter((x,i) => {
+				x['number'] = i + 1 // save the orginal number
+				let name = x["اســـــم الطــــالــــــــب"]
+				let number = x["رقم الجلــــــــوس"]
+
+				return !isNaN(+inp.value) ? number.includes(inp.value) : name.includes(inp.value)
+			})
+            
+            ul.innerHTML = ''
+            filteredData.forEach(x => {
+                let li = document.createElement('li')
+                let name = document.createElement('p')
+                let n = document.createElement('p')
+                let main = document.createElement('div')
+                let div = document.createElement('div')
+				let standText = document.createElement('p')
+				let standNumber = document.createElement('p')
+				let standWrapper = document.createElement('span')
+				let nameWrapper = document.createElement('span')
+
+				standText.innerText = "رقم الجلــــــــوس"
+				standNumber.innerText = x["رقم الجلــــــــوس"]
+				standWrapper.append(standText,standNumber)
+				standWrapper.classList.add('no-style')
+				
+                n.innerText = x['number']
+                name.innerText = x["اســـــم الطــــالــــــــب"]
+				nameWrapper.append(n,name)
+				nameWrapper.classList.add('no-style')
+
+				main.append(nameWrapper,standWrapper);
+				main.classList.add('main');
+				div.classList.add('grid')
+				li.append(main,div);
+
+				numbers.filter(x => x != "رقم الجلــــــــوس").forEach(y => {
+					if(!x[y]) return
+
+					let span = document.createElement('span')
+					let name = document.createElement('p')
+					let value = document.createElement('p')
+                    name.innerText = y
+                    value.innerText = x[y]
+                    span.append(name,value)
+					if(y == "مجموع الكلى") span.classList.add('main')
+                    div.append(span)
+				})
+
+                ul.appendChild(li)
+            })
+
+            document.body.appendChild(ul)
+        }
+
+        console.clear()
+        main()
+
+		select.addEventListener('change',main)
+		inp.addEventListener('input',main)
+		checkbox.addEventListener('input',_ => {
+			document.body.classList[checkbox.checked ? "remove" : "add"]('hide-materials')
+		})
+    </script>
+</body>
+</html>
