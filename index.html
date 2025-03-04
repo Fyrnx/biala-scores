@@ -143,7 +143,7 @@
         async function main() {
             if(!data) data = Object.values(await fetch('sorted.json').then(x => x.json()))
             
-			let filteredData = data.filter( (x,i) => { return !isNaN(+inp.value) ? x[1].includes(inp.value) : x[2].includes(inp.value.replaceAll(' ','')) })
+			let filteredData = data.filter( (x,i) => { return !isNaN(+inp.value) ? x[1].includes(inp.value) : x[2].replaceAll(' ','').includes(inp.value.replaceAll(' ','')) })
 
             ul.innerHTML = ''
             filteredData.forEach(x => {
