@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body class="hide-materials">
+
+    <style>
+
+		* {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+		}
+
+        body {
+			direction: rtl;
+			background: #fff;
+			display: flex;
+			flex-direction: column;
+			gap: 20px;
+		}
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            font-weight: 500;
+            color: #111;
+			width: 100%;
+			overflow: hidden;
+        }
+
+        li {
+            display: flex;
+            gap: 10px;
+			background: #555;
+            padding: 10px;
+			width: 100%;
+			flex-direction: column;
+
+			flex-shrink: 0;
+			flex-wrap: wrap;
+        }
+
+		li:nth-child(2n) {
+			background: #3b3b3b;
+		}
+
+		span:not(.no-style), .main {
+			display: flex;
+			flex-direction: يهق;
+			gap: 5px;
+			align-items: center;
+			flex-shrink: 0;
+			white-space: nowrap;
+			padding: 5px;
+			border-radius: 3px;
+			color: white;
+			flex-wrap: wrap;
+
+		}
+
+
+        div#controls { 
+          display: flex;
+          justify-content: space-between;
+
+		  > span { 
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			justify-content: end;
+			gap: 5px;
+		  }
+        }
+
+		.grid { 
+			display: grid;
+			grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+			gap: 10px;
+			flex: 1;
+			width: 100%;
+			overflow: auto;
+		}
+
+		.main {
+			display: flex;
+			flex-direction: row;
+            justify-content: space-between;
+			gap: 10px;
+			width: 100%;
+			overflow: auto;
+
+			span { 
+				display: flex;
+				white-space: nowrap;
+				gap: 5px;
+			}
+		}
+
+        select {
+          padding: 4px;
+          font-size: 1.1em;
+        }
+
+		.hide-materials .grid span:not(.main) {display: none;}
+    </style>
+
+    <div id="controls">
+      <input type="text" class="name">
+    </div>
+
+    <ul></ul>
+
+    <script>
+        console.clear()
+        let data
+        let ul = document.querySelector('ul')
+        
+        let numbers = [
+			"رقم الجلــــــــوس",
+			'مجموع الكلى'
+        ]
+
+		let filters = {
+			"اسم الطالب": (a,b) => [a["اســـــم الطــــالــــــــب"],b["اســـــم الطــــالــــــــب"]].sort()[0] == b["اســـــم الطــــالــــــــب"],
+		}
+
+		numbers.forEach(value => {
+			filters[value] = (a,b) => {
+                return b[value] - a[value]
+            }
+		})
+
+		let inp = document.querySelector('input[type="text"]')
+
+        async function main() {
+            if(!data) data = Object.values(await fetch('girlsData.json').then(x => x.json()))
+            
+			let filteredData = data.filter( (x,i) => { return !isNaN(+inp.value) ? x[1].includes(inp.value) : x[2].replaceAll(' ','').includes(inp.value.replaceAll(' ','')) })
+
+            ul.innerHTML = ''
+            filteredData.forEach(x => {
+                let li = document.createElement('li')
+                let name = document.createElement('p')
+                let n = document.createElement('p')
+                let main = document.createElement('div')
+                let div = document.createElement('div')
+				let standText = document.createElement('p')
+				let standNumber = document.createElement('p')
+				let standWrapper = document.createElement('span')
+				let nameWrapper = document.createElement('span')
+
+				standText.innerText = "رقم الجلــــــــوس"
+				standNumber.innerText = x[1]
+				standWrapper.append(standText,standNumber)
+				standWrapper.classList.add('no-style')
+				
+                n.innerText = '#' +x[0]
+                name.innerText = x[2]
+				nameWrapper.append(n,name)
+				nameWrapper.classList.add('no-style')
+
+				main.append(nameWrapper,standWrapper);
+				main.classList.add('main');
+				div.classList.add('grid')
+				li.append(main,div);
+
+				let span = document.createElement('span')
+				let value = document.createElement('p')
+				let value2 = document.createElement('p')
+				value.innerText = 'المجموع'
+				value2.innerText = x[3]
+				span.append(value,value2)
+				span.classList.add('main')
+				div.append(span)
+
+                ul.appendChild(li)
+            })
+
+            document.body.appendChild(ul)
+        }
+
+        console.clear()
+        main()
+		inp.addEventListener('input',main)
+    </script>
+</body>
+</html>
